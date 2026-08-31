@@ -4,18 +4,15 @@ namespace RunWindow;
 
 public static class Exec
 {
-    static public async Task ExecCommandAsync(string command)
+    static public void ExecCommandAsync(string command)
     {
         var startinfo = new ProcessStartInfo
         {
             FileName = "x-terminal-emulator",
             Arguments = $"-e bash -c \"{command}\"",
-            UseShellExecute = false,
+            UseShellExecute = true,
         };
 
-        using (var p = Process.Start(startinfo))
-        {
-            await p.WaitForExitAsync();
-        }
+        Process.Start(startinfo);
     }
 }

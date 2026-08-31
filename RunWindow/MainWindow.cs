@@ -35,7 +35,8 @@ public partial class MainWindow
 
         button.OnClicked += async (_, _) =>
         {
-            await Exec.ExecCommandAsync(input.GetText());
+            Exec.ExecCommandAsync(input.GetText());
+            Close();
         };
 
         layout.Append(button);
