@@ -20,10 +20,13 @@ public partial class MainWindow
 
     partial void Initialize()
     {
+        Resizable = false;
+
         Title = "Run...";
         SetDefaultSize(350, 120);
 
         var head = Adw.HeaderBar.New();
+        head.SetDecorationLayout(":close");
 
         var layout = Gtk.Box.New(Gtk.Orientation.Horizontal, 5);
         layout.SetMarginBottom(10);
@@ -59,10 +62,17 @@ public partial class MainWindow
 
         layout.Append(open);
 
-        button.OnClicked += async (_, _) =>
+        button.OnClicked += (_, _) =>
         {
-            Exec.ExecCommand(input.GetText());
-            Close();
+            if (!string.IsNullOrEmpty(input.GetText()))
+            {
+                Exec.ExecCommand(input.GetText());
+                Close();
+            }
+            else
+            {
+                ErrorBell();
+            }
         };
 
         cancel_button.OnClicked += (_, _) =>
@@ -72,8 +82,15 @@ public partial class MainWindow
 
         var execwithroot = CallbackAction.New((widget, args_) =>
         {
-            Exec.ExecCommandWithRoot(input.GetText());
-            Close();
+            if (!string.IsNullOrEmpty(input.GetText()))
+            {
+                Exec.ExecCommandWithRoot(input.GetText());
+                Close();
+            }
+            else
+            {
+                ErrorBell();
+            }
             return true;
         });
         var controller = ShortcutController.New();
