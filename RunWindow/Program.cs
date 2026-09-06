@@ -1,9 +1,9 @@
-﻿var app = Gtk.Application.New("io.github.winver10.run", Gio.ApplicationFlags.FlagsNone);
+﻿var app = Adw.Application.New("io.github.winver10.run", Gio.ApplicationFlags.FlagsNone);
 
 app.OnActivate += (sender, arg) =>
 {
     var window = RunWindow.MainWindow.New();
-    window.Application = (Gtk.Application)sender;
+    window.Application = (Adw.Application)sender;
     window.Show();
 };
 
