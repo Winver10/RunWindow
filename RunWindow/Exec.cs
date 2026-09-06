@@ -26,4 +26,14 @@ public static class Exec
 
         Process.Start(startinfo);
     }
+    static public void OpenUrl(string url)
+    {
+        var startinfo = new ProcessStartInfo
+        {
+            FileName = "xdg-open",
+            Arguments = url,
+        };
+
+        Process.Start(startinfo);
+    }
 }

@@ -1,3 +1,4 @@
+#nullable enable
 using GObject;
 using Graphene;
 using Adw;
@@ -17,7 +18,15 @@ public partial class MainWindow
     {
         Initialize();
     }
-
+    Adw.HeaderBar _headerbar;
+    Gtk.Box _layout = Gtk.Box.New(Orientation.Horizontal, 5);
+    Label _desc = Label.New("Type the name of a program, forder, document, or Internet resource, and Linux will open it for you.");
+    Label _open = Label.New("Open...:");
+    Entry _input = Entry.New();
+    Button _run = Button.NewWithLabel("Run");
+    Button _cancel = Button.NewWithLabel("Cancel");
+    Gtk.Box _buttons = Gtk.Box.New(Orientation.Horizontal, 10);
+    Gtk.Box _main = Gtk.Box.New(Orientation.Vertical, 0);
     partial void Initialize()
     {
         Resizable = false;
@@ -25,66 +34,46 @@ public partial class MainWindow
         Title = "Run...";
         SetDefaultSize(350, 120);
 
-        var head = Adw.HeaderBar.New();
-        head.SetDecorationLayout(":close");
+        _headerbar = Adw.HeaderBar.New();
+        _headerbar.SetDecorationLayout(":close");
 
-        var layout = Gtk.Box.New(Gtk.Orientation.Horizontal, 5);
-        layout.SetMarginBottom(10);
-        layout.SetMarginTop(10);
-        layout.SetMarginEnd(20);
-        layout.SetMarginStart(20);
-        layout.SetHalign(Align.Center);
+        _layout.SetMarginBottom(10);
+        _layout.SetMarginTop(10);
+        _layout.SetMarginEnd(20);
+        _layout.SetMarginStart(20);
+        _layout.SetHalign(Align.Center);
 
-        var describ = Gtk.Label.New("Type the name of a program, forder, document, or Internet resource, and Linux will open it for you.");
-        describ.SetWrap(true);
-        describ.SetWrapMode(Pango.WrapMode.WordChar);
-        describ.SetMarginStart(15);
-        describ.SetMarginEnd(20);
-        describ.SetMarginTop(10);
-        var open = Gtk.Label.New("Open...:");
+        _desc.SetWrap(true);
+        _desc.SetWrapMode(Pango.WrapMode.WordChar);
+        _desc.SetMarginStart(15);
+        _desc.SetMarginEnd(20);
+        _desc.SetMarginTop(10);
 
 
-        var input = Gtk.Entry.New();
-        input.PlaceholderText = "Input Command...";
-        input.SetSizeRequest(300, -1);
+        _input.PlaceholderText = "Input Command...";
+        _input.SetSizeRequest(300, -1);
 
-        var button = Gtk.Button.New();
-        button.Label = "Run..";
-        button.SetSizeRequest(60, -1);
+        _run.SetSizeRequest(60, -1);
 
-        var cancel_button = Button.NewWithLabel("Cancel");
+        _buttons.SetMarginStart(20);
+        _buttons.SetMarginEnd(20);
+        _buttons.Append(_run);
+        _buttons.Append(_cancel);
 
-        var options = Gtk.Box.New(Orientation.Horizontal, 10);
-        options.SetMarginStart(20);
-        options.SetMarginEnd(20);
-        options.Append(button);
-        options.Append(cancel_button);
+        _layout.Append(_open);
 
-        layout.Append(open);
+        _run.OnClicked += Run;
 
-        button.OnClicked += (_, _) =>
-        {
-            if (!string.IsNullOrEmpty(input.GetText()))
-            {
-                Exec.ExecCommand(input.GetText());
-                Close();
-            }
-            else
-            {
-                ErrorBell();
-            }
-        };
-
-        cancel_button.OnClicked += (_, _) =>
+        _cancel.OnClicked += (_, _) =>
         {
             Close();
         };
 
-        var execwithroot = CallbackAction.New((widget, args_) =>
+        var execwithroot = CallbackAction.New((widget, args) =>
         {
-            if (!string.IsNullOrEmpty(input.GetText()))
+            if (!string.IsNullOrEmpty(_input.GetText()))
             {
-                Exec.ExecCommandWithRoot(input.GetText());
+                Exec.ExecCommandWithRoot(_input.GetText());
                 Close();
             }
             else
@@ -93,19 +82,24 @@ public partial class MainWindow
             }
             return true;
         });
-        var controller = ShortcutController.New();
-        controller.Scope = ShortcutScope.Global;
-        controller.AddShortcut(Shortcut.New(ShortcutTrigger.ParseString("<Control><Shift>Return"), execwithroot));
-        input.AddController(controller);
-        layout.Append(input);
+        var _rootctrl = ShortcutController.New();
+        _rootctrl.Scope = ShortcutScope.Global;
+        _rootctrl.AddShortcut(Shortcut.New(ShortcutTrigger.ParseString("<Control><Shift>Return"), execwithroot));
 
-        var mainbox = Gtk.Box.New(Orientation.Vertical, 0);
-        mainbox.Append(head);
-        mainbox.Append(describ);
-        mainbox.Append(layout);
-        mainbox.Append(options);
+        var exit = CallbackAction.New((widget, args) =>
+        { Close(); return true; });
+        _rootctrl.AddShortcut(Shortcut.New(ShortcutTrigger.ParseString("Escape"), exit));
+        AddController(_rootctrl);
 
-        Content = mainbox;
+        _input.OnActivate += (_, _) => Run(null, null);
+        _layout.Append(_input);
+
+        _main.Append(_headerbar);
+        _main.Append(_desc);
+        _main.Append(_layout);
+        _main.Append(_buttons);
+
+        Content = _main;
 
 
 
@@ -117,6 +111,26 @@ public partial class MainWindow
         //         Exec.ExecCommand(input.Text_);
         //     }
         // };
+    }
+
+    private void Run(Button? sender, EventArgs? args)
+    {
+        if (!string.IsNullOrEmpty(_input.GetText()))
+        {
+            if (_input.GetText().StartsWith("https://", StringComparison.CurrentCultureIgnoreCase) || _input.GetText().StartsWith("http://", StringComparison.CurrentCultureIgnoreCase) || _input.GetText().StartsWith("fps://", StringComparison.CurrentCultureIgnoreCase))
+            {
+                Exec.OpenUrl(_input.GetText());
+            }
+            else
+            {
+                Exec.ExecCommand(_input.GetText());
+            }
+            Close();
+        }
+        else
+        {
+            ErrorBell();
+        }
     }
 
     // private bool ChooseFileToRun(object? sender, EventArgs e)
