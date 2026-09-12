@@ -4,12 +4,13 @@ namespace RunWindow;
 
 public static class Exec
 {
+    static public string UserShell = "bash";
     static public void ExecCommand(string command)
     {
         var startinfo = new ProcessStartInfo
         {
             FileName = "x-terminal-emulator",
-            Arguments = $"-e bash -c \"{command}\"",
+            Arguments = $"-e {UserShell} -c \"{command}\"",
             UseShellExecute = true,
         };
 
@@ -20,7 +21,7 @@ public static class Exec
         var startinfo = new ProcessStartInfo
         {
             FileName = "x-terminal-emulator",
-            Arguments = $"-e pkexec bash -c \"{comamnd}\"",
+            Arguments = $"-e pkexec {UserShell} -c \"{comamnd}\"",
             UseShellExecute = true,
         };
 

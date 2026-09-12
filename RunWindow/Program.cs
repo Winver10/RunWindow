@@ -1,4 +1,8 @@
-﻿var app = Adw.Application.New("io.github.winver10.run", Gio.ApplicationFlags.FlagsNone);
+﻿using RunWindow;
+
+Exec.UserShell = Environment.GetEnvironmentVariable("SHELL") ?? "bash";
+
+var app = Adw.Application.New("io.github.winver10.run", Gio.ApplicationFlags.FlagsNone);
 
 app.OnActivate += (sender, arg) =>
 {
